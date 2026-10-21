@@ -36,64 +36,82 @@ export default function LoginPage() {
       router.push("/boards");
     } catch (err) {
       const apiError = getApiError(err);
-      setError(apiError?.message || "Erro ao autenticar.");
+      setError(apiError?.message || "Não foi possível concluir. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
+  const isLogin = mode === "login";
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold">{t("auth.title")}</h1>
-        <p className="mt-2 text-sm text-[#64748B]">
-          {mode === "login" ? t("auth.login") : t("auth.register")}
-        </p>
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          {mode === "register" && (
-            <label className="block text-sm">
-              {t("auth.name")}
-              <input
-                className="mt-1 w-full rounded-md border border-[#E2E8F0] px-3 py-2"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </label>
-          )}
-          <label className="block text-sm">
-            {t("auth.email")}
-            <input
-              type="email"
-              className="mt-1 w-full rounded-md border border-[#E2E8F0] px-3 py-2"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-          <label className="block text-sm">
-            {t("auth.password")}
-            <input
-              type="password"
-              className="mt-1 w-full rounded-md border border-[#E2E8F0] px-3 py-2"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </label>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            className="w-full rounded-md bg-[#3B82F6] px-4 py-2 text-white"
-            disabled={loading}
-          >
-            {loading ? "..." : mode === "login" ? t("auth.login") : t("auth.register")}
-          </button>
-        </form>
-        <button
-          className="mt-4 text-sm text-[#64748B]"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
-        >
-          {mode === "login" ? t("auth.register") : t("auth.login")}
-        </button>
-      </div>
-    </div>
+    <main className="auth-shell">
+      <div className="auth-orb auth-orb-a" />
+      <div className="auth-orb auth-orb-b" />
+      <div className="auth-orb auth-orb-c" />
+
+      <section className="auth-layout" aria-label="Flowio account access">
+        <div className="auth-story">
+          <a href="/" className="auth-brand" aria-label="Flowio home">
+            <span className="auth-mark" aria-hidden="true"><i /><i /><i /></span>
+            <span>flowio</span>
+          </a>
+          <div className="auth-story-copy">
+            <p className="auth-eyebrow">IDEIAS EM MOVIMENTO</p>
+            <h1>Seu pensamento<br />ganha <em>forma.</em></h1>
+            <p className="auth-lede">Organize ideias, conecte possibilidades e transforme planos em algo real.</p>
+          </div>
+          <div className="liquid-scene" aria-hidden="true">
+            <div className="liquid-ring ring-one" />
+            <div className="liquid-ring ring-two" />
+            <div className="liquid-drop"><span /></div>
+            <div className="liquid-glint" />
+            <div className="liquid-caption">clareza para criar</div>
+          </div>
+          <p className="auth-footnote">Um espaço tranquilo para suas melhores ideias.</p>
+        </div>
+
+        <div className="auth-form-wrap">
+          <div className="auth-card">
+            <div className="auth-card-top">
+              <span className="auth-kicker">BEM-VINDO AO FLOWIO</span>
+              <span className="auth-status"><span /> SEU ESPAÇO CRIATIVO</span>
+            </div>
+            <h2>{isLogin ? t("auth.title") : "Comece por aqui"}</h2>
+            <p className="auth-intro">{isLogin ? "Entre para continuar de onde sua próxima ideia começa." : "Crie sua conta e tire suas ideias do papel."}</p>
+
+            <div className="auth-tabs" role="tablist" aria-label="Acesso à conta">
+              <button type="button" role="tab" aria-selected={isLogin} className={isLogin ? "active" : ""} onClick={() => { setMode("login"); setError(null); }}>{t("auth.login")}</button>
+              <button type="button" role="tab" aria-selected={!isLogin} className={!isLogin ? "active" : ""} onClick={() => { setMode("register"); setError(null); }}>{t("auth.register")}</button>
+            </div>
+
+            <form className="auth-form" onSubmit={handleSubmit}>
+              {!isLogin && (
+                <label>
+                  <span>{t("auth.name")}</span>
+                  <input autoComplete="name" required maxLength={120} value={name} onChange={(event) => setName(event.target.value)} placeholder="Como podemos chamar você?" />
+                </label>
+              )}
+              <label>
+                <span>{t("auth.email")}</span>
+                <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="voce@exemplo.com" />
+              </label>
+              <label>
+                <span>{t("auth.password")}</span>
+                <input type="password" autoComplete={isLogin ? "current-password" : "new-password"} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder={isLogin ? "Sua senha" : "Pelo menos 8 caracteres"} />
+              </label>
+
+              {error && <p className="auth-error" role="alert">{error}</p>}
+              <button className="auth-submit" type="submit" disabled={loading}>
+                <span>{loading ? "Aguarde..." : isLogin ? t("auth.login") : t("auth.register")}</span>
+                <span className="auth-arrow" aria-hidden="true">↗</span>
+              </button>
+            </form>
+            <p className="auth-legal">Ao continuar, você acessa seu espaço pessoal de criação.</p>
+          </div>
+          <p className="auth-copyright">FLOWIO <span>·</span> IDEIAS QUE ENCONTRAM CAMINHO</p>
+        </div>
+      </section>
+    </main>
   );
 }

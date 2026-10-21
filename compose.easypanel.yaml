@@ -62,7 +62,16 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - default
+      - easypanel
     restart: unless-stopped
+
+networks:
+  default:
+  easypanel:
+    external: true
+    name: easypanel
 
 volumes:
   flowio_db_data:

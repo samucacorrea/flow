@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${FLOWIO_DB_NAME:-flowio}
+      POSTGRES_USER: ${FLOWIO_DB_USER:-flowio}
+      POSTGRES_PASSWORD: ${FLOWIO_DB_PASSWORD:?Set FLOWIO_DB_PASSWORD in EasyPanel}
+    volumes:
+      - flowio_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FLOWIO_DB_USER:-flowio} -d ${FLOWIO_DB_NAME:-flowio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      APP_NAME: ${FLOWIO_APP_NAME:-Flowio}
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${FLOWIO_APP_KEY:?Set FLOWIO_APP_KEY in EasyPanel}
+      APP_URL: ${FLOWIO_APP_URL:?Set FLOWIO_APP_URL in EasyPanel}
+      LOG_CHANNEL: stack
+      LOG_LEVEL: warning
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${FLOWIO_DB_NAME:-flowio}
+      DB_USERNAME: ${FLOWIO_DB_USER:-flowio}
+      DB_PASSWORD: ${FLOWIO_DB_PASSWORD:?Set FLOWIO_DB_PASSWORD in EasyPanel}
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+      FRONTEND_URL: ${FLOWIO_APP_URL:?Set FLOWIO_APP_URL in EasyPanel}
+      FRONTEND_URLS: ${FLOWIO_APP_URL:?Set FLOWIO_APP_URL in EasyPanel}
+      CORS_ALLOW_ALL: "false"
+    volumes:
+      - flowio_storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: /api
+        API_PROXY_TARGET: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  flowio_db_data:
+  flowio_storage:

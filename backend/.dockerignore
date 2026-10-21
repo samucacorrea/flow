@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+vendor
+node_modules
+.git
+.DS_Store
+storage/logs/*
+storage/app/installed.flag

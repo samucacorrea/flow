@@ -1,0 +1,20 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env.local
+
+# Dependencies and generated output
+backend/vendor/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+dist/
+
+# Local state, logs, and editor/OS files
+backend/storage/logs/*
+backend/storage/app/installed.flag
+.DS_Store
+Arquivo.zip
+*.log

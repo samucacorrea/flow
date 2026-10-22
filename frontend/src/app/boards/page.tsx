@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { getApiError, useAuth } from "@/lib/auth";
@@ -28,6 +29,8 @@ export default function BoardsPage() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
   const [boardError, setBoardError] = useState<string | null>(null);
+  const createFormRef = useRef<HTMLDivElement>(null);
+  const boardNameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!token) {
@@ -95,8 +98,23 @@ export default function BoardsPage() {
     localStorage.setItem("flowio_workspace", id);
   };
 
+  const startWhiteboardCreation = () => {
+    setType("whiteboard");
+    createFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => boardNameInputRef.current?.focus(), 250);
+  };
+
   const handleCreateBoard = async () => {
-    if (!token || !currentWorkspaceId) return;
+    if (!token) return;
+    if (!currentWorkspaceId) {
+      setBoardError("Selecione ou crie um workspace antes de criar um board.");
+      return;
+    }
+    if (!name.trim()) {
+      setBoardError("Digite um nome para o board.");
+      boardNameInputRef.current?.focus();
+      return;
+    }
     setLoading(true);
     setBoardError(null);
     try {
@@ -228,7 +246,13 @@ export default function BoardsPage() {
                 <div className="text-2xl font-semibold text-[#0F172A]">{stats.whiteboards}</div>
               </div>
             </div>
-            <button className="mt-4 w-full rounded-lg border border-dashed border-[#D8DADD] px-3 py-2 text-xs font-semibold text-[#73757D] hover:border-[#F2674B] hover:text-[#D9563D]">
+            <button
+              type="button"
+              className="mt-4 w-full rounded-lg border border-dashed border-[#D8DADD] px-3 py-2 text-xs font-semibold text-[#73757D] hover:border-[#F2674B] hover:text-[#D9563D] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={startWhiteboardCreation}
+              disabled={!currentWorkspaceId}
+              title={!currentWorkspaceId ? "Crie um workspace primeiro" : "Criar whiteboard"}
+            >
               + Criar novo
             </button>
           </div>
@@ -237,11 +261,12 @@ export default function BoardsPage() {
         {workspaces.length === 0 ? (
           <CreateWorkspace onCreate={handleCreateWorkspace} error={workspaceError} />
         ) : (
-          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+          <div ref={createFormRef} className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 md:flex-row md:items-end">
               <label className="flex-1 text-sm">
                 {t("boards.name")}
                 <input
+                  ref={boardNameInputRef}
                   className="mt-1 w-full rounded-lg border border-[#E2E8F0] px-3 py-2"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -261,7 +286,7 @@ export default function BoardsPage() {
               <button
                 className="rounded-lg bg-[#F2674B] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#DE553C]"
                 onClick={handleCreateBoard}
-                disabled={loading}
+                disabled={loading || !name.trim() || !currentWorkspaceId}
               >
                 {t("boards.create")}
               </button>

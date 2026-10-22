@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getApiError, useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { trackLogin, trackPageView, trackSignUp } from "@/lib/analytics";
@@ -52,10 +53,10 @@ export default function LoginPage() {
 
       <section className="auth-layout" aria-label="Flowio account access">
         <div className="auth-story">
-          <a href="/" className="auth-brand" aria-label="Flowio home">
+          <Link href="/" className="auth-brand" aria-label="Flowio home">
             <span className="auth-mark" aria-hidden="true"><i /><i /><i /></span>
             <span>flowio</span>
-          </a>
+          </Link>
           <div className="auth-story-copy">
             <p className="auth-eyebrow">IDEIAS EM MOVIMENTO</p>
             <h1>Seu pensamento<br />ganha <em>forma.</em></h1>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\BoardController;
 use App\Http\Controllers\Api\BoardDocumentController;
 use App\Http\Controllers\Api\StripeWebhookController;
@@ -21,6 +22,14 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    Route::prefix('admin')->group(function () {
+        Route::get('/access', [AdminController::class, 'access']);
+        Route::middleware('admin')->group(function () {
+            Route::get('/users', [AdminController::class, 'users']);
+            Route::patch('/users/{user}', [AdminController::class, 'updateUser']);
+        });
+    });
 
     Route::get('/workspaces', [WorkspaceController::class, 'index']);
     Route::post('/workspaces', [WorkspaceController::class, 'store']);

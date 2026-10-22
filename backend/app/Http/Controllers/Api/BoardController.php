@@ -28,7 +28,7 @@ class BoardController extends ApiController
             'settings_json' => ['sometimes', 'array'],
         ]);
 
-        if (!$plans->canCreateBoard($workspace, $data['type'])) {
+        if (!$plans->canCreateBoard($workspace, $data['type'], $request->user())) {
             return $this->error('Board limit reached.', 'board_limit_reached', 403);
         }
 

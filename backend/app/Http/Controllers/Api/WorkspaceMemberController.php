@@ -27,7 +27,7 @@ class WorkspaceMemberController extends ApiController
             'role' => ['required', 'in:owner,admin,member,viewer'],
         ]);
 
-        if (!$plans->canAddMember($workspace)) {
+        if (!$plans->canAddMember($workspace, $request->user())) {
             return $this->error('Member limit reached.', 'member_limit_reached', 403);
         }
 

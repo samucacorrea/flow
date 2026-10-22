@@ -7,6 +7,8 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  is_admin?: boolean;
+  unlimited_limits?: boolean;
 };
 
 export type Workspace = {

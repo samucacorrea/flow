@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Models\Workspace;
+use App\Models\User;
 
 class PlanCapabilityService
 {
     public const PLAN_FREE = 'free';
     public const PLAN_PRO = 'pro';
     public const PLAN_TEAM = 'team';
-
-    public function canCreateBoard(Workspace $workspace, string $type): bool
+    public function hasUnlimitedLimits(User $user): bool
     {
-        if ($this->isPaid($workspace)) {
+        return (bool) $user->unlimited_limits;
+    }
+
+    public function canCreateBoard(Workspace $workspace, string $type, User $user): bool
+    {
+        if ($this->hasUnlimitedLimits($user) || $this->isPaid($workspace)) {
             return true;
         }
 
@@ -22,9 +27,9 @@ class PlanCapabilityService
         return $count < $limit;
     }
 
-    public function canAddMember(Workspace $workspace): bool
+    public function canAddMember(Workspace $workspace, User $user): bool
     {
-        if ($this->isTeam($workspace)) {
+        if ($this->hasUnlimitedLimits($user) || $this->isTeam($workspace)) {
             return true;
         }
 
@@ -43,9 +48,9 @@ class PlanCapabilityService
         return $currentWorkspaceCount < 1;
     }
 
-    public function canExportPdf(Workspace $workspace): bool
+    public function canExportPdf(Workspace $workspace, User $user): bool
     {
-        return $this->isPaid($workspace);
+        return $this->hasUnlimitedLimits($user) || $this->isPaid($workspace);
     }
 
     public function isPaid(Workspace $workspace): bool

@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
@@ -16,7 +19,28 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { token } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [access, setAccess] = useState<"checking" | "granted" | "denied" | "error">("checking");
+
+  useEffect(() => {
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    apiFetch<{ is_admin: boolean }>("/admin/access", {}, token)
+      .then(({ is_admin }) => setAccess(is_admin ? "granted" : "denied"))
+      .catch(() => setAccess("denied"));
+  }, [token, router]);
+
+  if (!token || access === "checking") {
+    return <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] text-sm text-[#64748B]">Verificando acesso administrativo...</div>;
+  }
+  if (access !== "granted") {
+    return <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-6 text-center text-[#334155]">Esta área é restrita a administradores.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">

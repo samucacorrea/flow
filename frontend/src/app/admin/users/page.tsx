@@ -1,214 +1,162 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { apiFetch, ApiError } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 type AdminUser = {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: "owner" | "admin" | "member" | "viewer";
-  status: "active" | "inactive";
-  plan: "Free" | "Pro" | "Team";
-  joinedAt: string;
+  is_admin: boolean;
+  unlimited_limits: boolean;
+  created_at: string;
 };
 
-const users: AdminUser[] = [
-  {
-    id: "u1",
-    name: "Sarah Jensen",
-    email: "sarah@flowio.io",
-    role: "owner",
-    status: "active",
-    plan: "Pro",
-    joinedAt: "2026-01-12",
-  },
-  {
-    id: "u2",
-    name: "Tom Cook",
-    email: "tom@flowio.io",
-    role: "admin",
-    status: "active",
-    plan: "Team",
-    joinedAt: "2026-01-20",
-  },
-  {
-    id: "u3",
-    name: "Maya Lin",
-    email: "maya@flowio.io",
-    role: "member",
-    status: "inactive",
-    plan: "Free",
-    joinedAt: "2025-12-05",
-  },
-];
+type UserPage = { data: AdminUser[]; current_page: number; last_page: number; total: number };
 
 export default function UsersPage() {
+  const { token, user: currentUser } = useAuth();
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [error, setError] = useState("");
+
+  const loadUsers = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    setError("");
+    try {
+      const result = await apiFetch<UserPage>(`/admin/users?page=${page}`, {}, token);
+      setUsers(result.data);
+      setLastPage(result.last_page);
+      setTotal(result.total);
+    } catch (err) {
+      setError((err as ApiError)?.message || "Não foi possível carregar os usuários.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, token]);
+
+  useEffect(() => { void loadUsers(); }, [loadUsers]);
 
   const filtered = useMemo(() => {
-    return users.filter((user) => {
-      const matchesQuery =
-        user.name.toLowerCase().includes(query.toLowerCase()) ||
-        user.email.toLowerCase().includes(query.toLowerCase());
-      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-      return matchesQuery && matchesStatus;
-    });
-  }, [query, statusFilter]);
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return users;
+    return users.filter((item) => `${item.name} ${item.email}`.toLowerCase().includes(normalized));
+  }, [query, users]);
+
+  const togglePermission = async (target: AdminUser, permission: "is_admin" | "unlimited_limits") => {
+    if (!token) return;
+    const enabled = !target[permission];
+    setBusyId(target.id);
+    setError("");
+    try {
+      const result = await apiFetch<{ user: AdminUser }>(`/admin/users/${target.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ [permission]: enabled }),
+      }, token);
+      setUsers((current) => current.map((item) => item.id === target.id ? result.user : item));
+    } catch (err) {
+      setError((err as ApiError)?.message || "Não foi possível salvar a permissão.");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold">User Management</h2>
-          <p className="text-sm text-[#64748B]">Gerencie usuários e permissões.</p>
+          <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#0F8A70]">Administração</p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#123B39]">Usuários e permissões</h2>
+          <p className="mt-1 text-sm text-[#647D79]">Controle quem administra o Flowio e quem tem limites ilimitados.</p>
         </div>
-        <button className="rounded-lg bg-[#3B82F6] px-4 py-2 text-sm font-semibold text-white shadow-sm">
-          Add user
-        </button>
-      </div>
-
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-sm">
-            <input
-              className="w-full rounded-lg border border-[#E2E8F0] px-4 py-2 text-sm"
-              placeholder="Search users..."
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[#64748B]">Status</span>
-            <select
-              className="rounded-lg border border-[#E2E8F0] px-3 py-2"
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")}
-            >
-              <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
+        <div className="rounded-xl border border-[#DCEAE5] bg-white px-4 py-3 text-sm text-[#45645F]">
+          Usuários cadastrados <strong className="ml-2 text-[#123B39]">{total}</strong>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-[#E2E8F0] text-xs uppercase tracking-wider text-[#94A3B8]">
-            <tr>
-              <th className="px-6 py-3">User</th>
-              <th className="px-6 py-3">Plan</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Role</th>
-              <th className="px-6 py-3">Date Joined</th>
-              <th className="px-6 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((user) => (
-              <tr key={user.id} className="border-b border-[#E2E8F0]/60 last:border-b-0">
-                <td className="px-6 py-4">
-                  <div className="font-semibold text-[#0F172A]">{user.name}</div>
-                  <div className="text-xs text-[#94A3B8]">{user.email}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="rounded-full bg-[#EFF6FF] px-3 py-1 text-xs font-semibold text-[#3B82F6]">
-                    {user.plan}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                      user.status === "active"
-                        ? "bg-[#DCFCE7] text-[#15803D]"
-                        : "bg-[#F1F5F9] text-[#64748B]"
-                    }`}
-                  >
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        user.status === "active" ? "bg-[#22C55E]" : "bg-[#94A3B8]"
-                      }`}
-                    />
-                    {user.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 capitalize">{user.role}</td>
-                <td className="px-6 py-4">{user.joinedAt}</td>
-                <td className="px-6 py-4 text-right">
-                  <button
-                    className="rounded-lg border border-[#E2E8F0] px-3 py-1 text-xs text-[#0F172A]"
-                    onClick={() => setSelectedUser(user)}
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td className="px-6 py-6 text-center text-sm text-[#94A3B8]" colSpan={6}>
-                  Nenhum usuário encontrado.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {error && <p role="alert" className="rounded-xl border border-[#F0C6BD] bg-[#FFF5F2] px-4 py-3 text-sm text-[#9D3F30]">{error}</p>}
 
-      {selectedUser && (
-        <div className="fixed inset-0 z-40 flex justify-end bg-black/20 backdrop-blur-sm">
-          <div className="h-full w-full max-w-md bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">User Details</h3>
-              <button
-                className="rounded-full border border-[#E2E8F0] px-3 py-1 text-xs text-[#64748B]"
-                onClick={() => setSelectedUser(null)}
-              >
-                Close
-              </button>
-            </div>
-            <div className="mt-6 flex flex-col gap-4 text-sm">
-              <div>
-                <p className="text-xs text-[#94A3B8]">Name</p>
-                <p className="font-semibold">{selectedUser.name}</p>
-              </div>
-              <div>
-                <p className="text-xs text-[#94A3B8]">Email</p>
-                <p>{selectedUser.email}</p>
-              </div>
-              <div>
-                <p className="text-xs text-[#94A3B8]">Role</p>
-                <p className="capitalize">{selectedUser.role}</p>
-              </div>
-              <div>
-                <p className="text-xs text-[#94A3B8]">Plan</p>
-                <p>{selectedUser.plan}</p>
-              </div>
-              <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
-                <p className="text-xs text-[#94A3B8]">Status</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      selectedUser.status === "active" ? "bg-[#22C55E]" : "bg-[#94A3B8]"
-                    }`}
-                  />
-                  <span className="capitalize">{selectedUser.status}</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 flex gap-2">
-              <button className="flex-1 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm">
-                Reset Password
-              </button>
-              <button className="flex-1 rounded-lg bg-[#3B82F6] px-3 py-2 text-sm text-white">
-                Save
-              </button>
-            </div>
+      <section className="overflow-hidden rounded-2xl border border-[#DFEAE6] bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E8F0ED] p-4">
+          <div>
+            <h3 className="font-semibold text-[#183E3A]">Contas</h3>
+            <p className="mt-1 text-xs text-[#78908C]">As alterações são aplicadas imediatamente.</p>
+          </div>
+          <input
+            aria-label="Buscar usuário"
+            className="w-full rounded-lg border border-[#D8E5E0] px-3 py-2 text-sm text-[#173C39] outline-none focus:border-[#31A98D] focus:ring-4 focus:ring-[#31A98D]/10 sm:w-72"
+            placeholder="Buscar por nome ou e-mail"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+
+        {loading ? (
+          <div className="p-10 text-center text-sm text-[#718985]">Carregando usuários...</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-10 text-center text-sm text-[#718985]">Nenhum usuário encontrado.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="bg-[#F7FAF8] text-[11px] uppercase tracking-wider text-[#77908B]">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Usuário</th>
+                  <th className="px-5 py-3 font-semibold">Criado em</th>
+                  <th className="px-5 py-3 font-semibold">Administrador</th>
+                  <th className="px-5 py-3 font-semibold">Limites ilimitados</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((item) => (
+                  <tr key={item.id} className="border-t border-[#EDF2F0]">
+                    <td className="px-5 py-4">
+                      <div className="font-semibold text-[#183E3A]">{item.name}</div>
+                      <div className="mt-1 text-xs text-[#809590]">{item.email}</div>
+                    </td>
+                    <td className="px-5 py-4 text-[#5D7772]">{new Date(item.created_at).toLocaleDateString("pt-BR")}</td>
+                    <td className="px-5 py-4">
+                      <button
+                        type="button"
+                        disabled={busyId === item.id || (item.id === currentUser?.id && item.is_admin)}
+                        onClick={() => void togglePermission(item, "is_admin")}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${item.is_admin ? "bg-[#DDF5EC] text-[#08795F]" : "bg-[#F0F3F2] text-[#61736F] hover:bg-[#E4EBE8]"}`}
+                        title={item.id === currentUser?.id && item.is_admin ? "Não é possível remover seu próprio acesso" : "Alterar acesso administrativo"}
+                      >
+                        {item.is_admin ? "Ativo" : "Inativo"}
+                      </button>
+                    </td>
+                    <td className="px-5 py-4">
+                      <button
+                        type="button"
+                        disabled={busyId === item.id}
+                        onClick={() => void togglePermission(item, "unlimited_limits")}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${item.unlimited_limits ? "bg-[#DDF5EC] text-[#08795F]" : "bg-[#F0F3F2] text-[#61736F] hover:bg-[#E4EBE8]"}`}
+                      >
+                        {item.unlimited_limits ? "Ilimitado" : "Plano padrão"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between border-t border-[#E8F0ED] px-5 py-3 text-xs text-[#718985]">
+          <span>Página {page} de {lastPage}</span>
+          <div className="flex gap-2">
+            <button className="rounded-md border border-[#DCE8E4] px-3 py-1.5 disabled:opacity-40" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)}>Anterior</button>
+            <button className="rounded-md border border-[#DCE8E4] px-3 py-1.5 disabled:opacity-40" disabled={page >= lastPage || loading} onClick={() => setPage((value) => value + 1)}>Próxima</button>
           </div>
         </div>
-      )}
+      </section>
     </div>
   );
 }

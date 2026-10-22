@@ -29,7 +29,7 @@ class WorkspaceController extends ApiController
             ->whereIn('subscription_status', ['active', 'trialing'])
             ->exists();
 
-        if ($currentCount >= 1 && !$hasTeamWorkspace) {
+        if (!$plans->hasUnlimitedLimits($user) && $currentCount >= 1 && !$hasTeamWorkspace) {
             return $this->error('Workspace limit reached.', 'workspace_limit_reached', 403);
         }
 

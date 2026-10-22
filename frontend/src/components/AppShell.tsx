@@ -70,7 +70,6 @@ export function AppShell({
         <div className="flow-topbar-branding">
           <Link href="/boards" className="flow-brand"><span className="flow-brand-mark">F</span>flowio</Link>
           <div className="flow-workspace-pill">
-            <span className="flow-workspace-icon" aria-hidden="true">▣</span>
             <WorkspaceSwitcher workspaces={workspaces} value={currentWorkspaceId} onChange={onWorkspaceChange} />
           </div>
         </div>

@@ -38,7 +38,7 @@ export function AppShell({
       <Link href="/billing" aria-current={pathname === "/billing" ? "page" : undefined} className={pathname === "/billing" ? "active" : ""}>
         <span className="flow-nav-glyph" aria-hidden="true">◈</span>{t("nav.billing")}
       </Link>
-      {user?.is_admin && <Link href="/admin/users"><span className="flow-nav-glyph" aria-hidden="true">⌘</span>Admin</Link>}
+      {user?.is_admin && <Link href="/admin" aria-current={pathname?.startsWith("/admin") ? "page" : undefined} className={pathname?.startsWith("/admin") ? "active" : ""}><span className="flow-nav-glyph" aria-hidden="true">⌘</span>Administração</Link>}
     </nav>
   );
 
@@ -50,6 +50,7 @@ export function AppShell({
           <div className="flow-fullbleed-links">
             <Link href="/boards">{t("nav.boards")}</Link>
             <Link href="/billing">{t("nav.billing")}</Link>
+            {user?.is_admin && <Link href="/admin">Administração</Link>}
           </div>
           <div className="flow-fullbleed-tools">
             {fullBleedSecondary}

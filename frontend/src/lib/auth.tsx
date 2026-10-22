@@ -56,7 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {},
       token
     );
-    setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+    setUser({
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      is_admin: data.user.is_admin,
+      unlimited_limits: data.user.unlimited_limits,
+    });
     setWorkspaces(data.user.workspaces || []);
   }, [token]);
 

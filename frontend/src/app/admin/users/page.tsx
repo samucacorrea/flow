@@ -11,7 +11,7 @@ type AdminUser = {
   is_admin: boolean;
   unlimited_limits: boolean;
   created_at: string;
-  workspaces: AdminWorkspace[];
+  workspaces?: AdminWorkspace[] | null;
 };
 
 type AdminWorkspace = {
@@ -41,7 +41,10 @@ export default function UsersPage() {
     setError("");
     try {
       const result = await apiFetch<UserPage>(`/admin/users?page=${page}`, {}, token);
-      setUsers(result.data);
+      setUsers((result.data || []).map((item) => ({
+        ...item,
+        workspaces: Array.isArray(item.workspaces) ? item.workspaces : [],
+      })));
       setLastPage(result.last_page);
       setTotal(result.total);
     } catch (err) {
@@ -87,7 +90,7 @@ export default function UsersPage() {
         body: JSON.stringify({ plan }),
       }, token);
       setUsers((current) => current.map((item) => item.id === owner.id
-        ? { ...item, workspaces: item.workspaces.map((entry) => entry.id === workspace.id ? result.workspace : entry) }
+        ? { ...item, workspaces: (item.workspaces || []).map((entry) => entry.id === workspace.id ? result.workspace : entry) }
         : item));
     } catch (err) {
       setError((err as ApiError)?.message || "Não foi possível alterar o plano.");
@@ -149,9 +152,9 @@ export default function UsersPage() {
                       <div className="mt-1 text-xs text-[#85868D]">{item.email}</div>
                     </td>
                     <td className="px-5 py-4">
-                      {item.workspaces.length ? (
+                      {(item.workspaces || []).length ? (
                         <div className="flex min-w-56 flex-col gap-2">
-                          {item.workspaces.map((workspace) => (
+                          {(item.workspaces || []).map((workspace) => (
                             <label key={workspace.id} className="flex items-center justify-between gap-3 text-xs text-[#73757D]">
                               <span className="flex min-w-0 items-center gap-1.5"><span className="max-w-36 truncate" title={workspace.name}>{workspace.name}</span>{workspace.manual_plan && <span className="rounded-full bg-[#FFF0EB] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#D9563D]">Manual</span>}</span>
                               <select

@@ -13,7 +13,7 @@ class PlanCapabilityService
 
     public function hasUnlimitedLimits(User $user): bool
     {
-        return (bool) $user->unlimited_limits;
+        return (bool) $user->unlimited_limits || (bool) $user->is_admin;
     }
 
     public function canCreateBoard(Workspace $workspace, string $type, User $user): bool

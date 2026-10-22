@@ -29,7 +29,9 @@ class AdminController extends ApiController
         return response()->json([
             'users' => User::count(),
             'admins' => User::where('is_admin', true)->count(),
-            'unlimited_users' => User::where('unlimited_limits', true)->count(),
+            'unlimited_users' => User::where('is_admin', true)
+                ->orWhere('unlimited_limits', true)
+                ->count(),
             'workspaces' => Workspace::count(),
             'manual_workspaces' => Workspace::where('manual_plan', true)->count(),
             'plans' => [

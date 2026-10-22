@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Workspace;
+use App\Models\User;
 use App\Services\PlanCapabilityService;
 use PHPUnit\Framework\TestCase;
 
@@ -28,5 +29,14 @@ class PlanCapabilityServiceTest extends TestCase
         ]);
 
         $this->assertFalse((new PlanCapabilityService())->isPaid($workspace));
+    }
+
+    public function test_system_administrators_bypass_product_limits(): void
+    {
+        $admin = new User();
+        $admin->is_admin = true;
+        $admin->unlimited_limits = false;
+
+        $this->assertTrue((new PlanCapabilityService())->hasUnlimitedLimits($admin));
     }
 }

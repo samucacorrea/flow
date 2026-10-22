@@ -76,6 +76,10 @@ class StripeWebhookController extends ApiController
             return;
         }
 
+        if ($workspace->manual_plan) {
+            return;
+        }
+
         $plan = $this->resolvePlanFromSubscription($subscription);
 
         if ($isDeleted) {
@@ -105,6 +109,10 @@ class StripeWebhookController extends ApiController
 
         $workspace = Workspace::find($subscription->workspace_id);
         if (!$workspace) {
+            return;
+        }
+
+        if ($workspace->manual_plan) {
             return;
         }
 

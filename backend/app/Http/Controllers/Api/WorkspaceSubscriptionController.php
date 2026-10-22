@@ -13,6 +13,10 @@ class WorkspaceSubscriptionController extends ApiController
     {
         Gate::authorize('manage-subscription', $workspace);
 
+        if ($workspace->manual_plan) {
+            return $this->error('This plan is managed manually by an administrator.', 'manual_plan', 409);
+        }
+
         $data = $request->validate([
             'plan' => ['required', 'in:pro,team'],
         ]);
@@ -44,6 +48,10 @@ class WorkspaceSubscriptionController extends ApiController
     public function portal(Request $request, Workspace $workspace)
     {
         Gate::authorize('manage-subscription', $workspace);
+
+        if ($workspace->manual_plan) {
+            return $this->error('Billing is managed manually by an administrator.', 'manual_plan', 409);
+        }
 
         $url = $workspace->billingPortalUrl(
             rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/').'/billing'

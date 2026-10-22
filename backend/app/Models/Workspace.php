@@ -20,10 +20,12 @@ class Workspace extends Model
         'name',
         'plan',
         'subscription_status',
+        'manual_plan',
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
+        'manual_plan' => 'boolean',
     ];
 
     public function members()

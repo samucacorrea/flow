@@ -28,7 +28,7 @@ export function PaywallModal({
             {t("paywall.close")}
           </button>
           <button
-            className="rounded-md bg-[#3B82F6] px-4 py-2 text-sm text-white"
+            className="rounded-lg bg-[#F2674B] px-4 py-2 text-sm font-semibold text-white hover:bg-[#DE553C]"
             onClick={onUpgrade}
           >
             {t("paywall.upgrade")}

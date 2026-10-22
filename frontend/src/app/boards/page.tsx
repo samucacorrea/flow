@@ -185,7 +185,7 @@ export default function BoardsPage() {
           <div className="flex flex-1 items-center gap-3 md:justify-end">
             <div className="relative w-full max-w-xs">
               <input
-                className="w-full rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-[#0F172A] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
+                className="w-full rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm text-[#202123] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F2674B]/25"
                 placeholder="Buscar boards..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -204,23 +204,23 @@ export default function BoardsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] p-5 text-white shadow-lg shadow-[#3B82F6]/20">
-            <div className="text-sm text-white/80">Total de boards</div>
-            <div className="mt-2 text-3xl font-semibold">{stats.total}</div>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7E8EA] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div className="text-sm text-[#73757D]">Total de boards</div>
+            <div className="mt-2 text-3xl font-semibold text-[#202123]">{stats.total}</div>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#F1F2F3] px-3 py-1 text-xs font-semibold text-[#686A72]">
               Ativos agora
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] p-5 text-white shadow-lg shadow-[#8B5CF6]/20">
-            <div className="text-sm text-white/80">Mind maps</div>
-            <div className="mt-2 text-3xl font-semibold">{stats.mindmaps}</div>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7E8EA] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div className="text-sm text-[#73757D]">Mind maps</div>
+            <div className="mt-2 text-3xl font-semibold text-[#202123]">{stats.mindmaps}</div>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#FFF0EB] px-3 py-1 text-xs font-semibold text-[#D9563D]">
               Organização criativa
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-[#E7E8EA] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F97316]/10 text-[#F97316]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0EB] text-[#F2674B]">
                 +
               </div>
               <div>
@@ -228,7 +228,7 @@ export default function BoardsPage() {
                 <div className="text-2xl font-semibold text-[#0F172A]">{stats.whiteboards}</div>
               </div>
             </div>
-            <button className="mt-4 w-full rounded-lg border border-dashed border-[#CBD5E1] px-3 py-2 text-xs font-semibold text-[#64748B] hover:border-[#F97316] hover:text-[#F97316]">
+            <button className="mt-4 w-full rounded-lg border border-dashed border-[#D8DADD] px-3 py-2 text-xs font-semibold text-[#73757D] hover:border-[#F2674B] hover:text-[#D9563D]">
               + Criar novo
             </button>
           </div>
@@ -259,7 +259,7 @@ export default function BoardsPage() {
                 </select>
               </label>
               <button
-                className="rounded-lg bg-[#F97316] px-4 py-2 text-sm text-white shadow-sm"
+                className="rounded-lg bg-[#F2674B] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#DE553C]"
                 onClick={handleCreateBoard}
                 disabled={loading}
               >
@@ -287,8 +287,8 @@ export default function BoardsPage() {
                       {board.type}
                     </div>
                     <div className="text-lg font-semibold">{board.name}</div>
-                    <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-xs font-semibold text-[#3B82F6]">
-                      <span className="h-2 w-2 rounded-full bg-[#3B82F6]" />
+                    <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#FFF0EB] px-2 py-0.5 text-xs font-semibold text-[#D9563D]">
+                      <span className="h-2 w-2 rounded-full bg-[#F2674B]" />
                       Ativo
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function BoardsPage() {
                       Editar
                     </button>
                     <button
-                      className="rounded-lg border border-[#F97316] px-3 py-1 text-xs text-[#F97316]"
+                      className="rounded-lg border border-[#F3B1A3] px-3 py-1 text-xs text-[#D9563D] hover:bg-[#FFF0EB]"
                       onClick={() => handleDeleteBoard(board.id)}
                     >
                       Excluir
@@ -346,7 +346,7 @@ function CreateWorkspace({
           onChange={(event) => setName(event.target.value)}
         />
         <button
-          className="rounded-md bg-[#F97316] px-4 py-2 text-sm text-white"
+          className="rounded-lg bg-[#F2674B] px-4 py-2 text-sm font-semibold text-white hover:bg-[#DE553C]"
           onClick={handleCreate}
           disabled={loading}
         >

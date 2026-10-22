@@ -26,174 +26,66 @@ export function AppShell({
   const { locale, setLocale, t } = useI18n();
 
   useEffect(() => {
-    if (pathname) {
-      trackPageView(pathname);
-    }
+    if (pathname) trackPageView(pathname);
   }, [pathname]);
+
+  const activeLabel = pathname?.startsWith("/billing") ? t("nav.billing") : t("nav.boards");
+  const nav = (
+    <nav className="flow-nav" aria-label="Navegação principal">
+      <Link href="/boards" aria-current={pathname === "/boards" ? "page" : undefined} className={pathname === "/boards" ? "active" : ""}>
+        <span className="flow-nav-glyph" aria-hidden="true">▦</span>{t("nav.boards")}
+      </Link>
+      <Link href="/billing" aria-current={pathname === "/billing" ? "page" : undefined} className={pathname === "/billing" ? "active" : ""}>
+        <span className="flow-nav-glyph" aria-hidden="true">◈</span>{t("nav.billing")}
+      </Link>
+      {user?.is_admin && <Link href="/admin/users"><span className="flow-nav-glyph" aria-hidden="true">⌘</span>Admin</Link>}
+    </nav>
+  );
 
   if (fullBleed) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-        <header className="border-b border-[#E2E8F0] bg-white">
-          <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-4">
-            <div className="flex items-center gap-6">
-              <div className="text-lg font-semibold text-[#0F172A]">Flowio</div>
-              <nav className="flex items-center gap-4 text-sm">
-                <Link
-                  href="/boards"
-                  className={pathname === "/boards" ? "text-[#0F172A]" : "text-[#64748B]"}
-                >
-                  {t("nav.boards")}
-                </Link>
-                <Link
-                  href="/billing"
-                  className={pathname === "/billing" ? "text-[#0F172A]" : "text-[#64748B]"}
-                >
-                  {t("nav.billing")}
-                </Link>
-              </nav>
-            </div>
-            {fullBleedSecondary && (
-              <div className="flex flex-1 items-center justify-between gap-4">
-                {fullBleedSecondary}
-              </div>
-            )}
-            <div className="flex items-center gap-4">
-              <WorkspaceSwitcher
-                workspaces={workspaces}
-                value={currentWorkspaceId}
-                onChange={onWorkspaceChange}
-              />
-              <button
-                className="rounded-full border border-[#E2E8F0] px-3 py-1 text-xs text-[#0F172A]"
-                onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
-              >
-                {locale.toUpperCase()}
-              </button>
-              <button className="text-sm text-[#64748B]" onClick={() => logout()}>
-                {t("nav.logout")}
-              </button>
-            </div>
+      <div className="flow-fullbleed-shell">
+        <header className="flow-fullbleed-topbar">
+          <Link href="/boards" className="flow-brand"><span className="flow-brand-mark">F</span>flowio</Link>
+          <div className="flow-fullbleed-links">
+            <Link href="/boards">{t("nav.boards")}</Link>
+            <Link href="/billing">{t("nav.billing")}</Link>
+          </div>
+          <div className="flow-fullbleed-tools">
+            {fullBleedSecondary}
+            <WorkspaceSwitcher workspaces={workspaces} value={currentWorkspaceId} onChange={onWorkspaceChange} />
+            <button className="flow-quiet-button" onClick={() => setLocale(locale === "pt" ? "en" : "pt")}>{locale.toUpperCase()}</button>
+            <button className="flow-quiet-button" onClick={() => void logout()}>{t("nav.logout")}</button>
           </div>
         </header>
-        <main className="w-full px-6 py-6">{children}</main>
+        <main className="flow-canvas-main">{children}</main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-64 flex-shrink-0 flex-col border-r border-[#E2E8F0] bg-white px-4 py-6 lg:flex">
-          <div className="flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F97316] text-white shadow-sm">
-              ◎
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-[#0F172A]">Flowio</span>
+    <div className="flow-app-shell">
+      <header className="flow-topbar">
+        <div className="flow-topbar-branding">
+          <Link href="/boards" className="flow-brand"><span className="flow-brand-mark">F</span>flowio</Link>
+          <div className="flow-workspace-pill">
+            <span className="flow-workspace-icon" aria-hidden="true">▣</span>
+            <WorkspaceSwitcher workspaces={workspaces} value={currentWorkspaceId} onChange={onWorkspaceChange} />
           </div>
-          <nav className="mt-8 flex flex-1 flex-col gap-1 text-sm">
-            <Link
-              href="/boards"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 font-medium transition ${
-                pathname === "/boards"
-                  ? "bg-[#EFF6FF] text-[#3B82F6]"
-                  : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-              }`}
-            >
-              <span className="text-base">🏠</span>
-              {t("nav.boards")}
-            </Link>
-            <Link
-              href="/billing"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 font-medium transition ${
-                pathname === "/billing"
-                  ? "bg-[#EFF6FF] text-[#3B82F6]"
-                  : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-              }`}
-            >
-              <span className="text-base">💳</span>
-              {t("nav.billing")}
-            </Link>
-            <button className="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]">
-              <span className="text-base">👥</span>
-              Shared
-              <span className="ml-auto rounded-full bg-[#F97316]/10 px-2 py-0.5 text-xs font-semibold text-[#F97316]">
-                3
-              </span>
-            </button>
-          </nav>
-          <div className="mt-6 rounded-xl border border-[#F97316]/20 bg-[#F97316]/10 p-4">
-            <div className="flex items-center justify-between text-xs text-[#F97316]">
-              <span className="rounded-full bg-white px-2 py-0.5">Upgrade</span>
-              <button className="text-[#F97316]/80">✕</button>
-            </div>
-            <h4 className="mt-2 text-sm font-semibold text-[#0F172A]">Upgrade para Pro</h4>
-            <p className="mt-1 text-xs text-[#64748B]">Desbloqueie boards ilimitados e export.</p>
-            <button className="mt-3 w-full rounded-lg border border-[#F97316]/20 bg-white px-3 py-2 text-xs font-semibold text-[#0F172A]">
-              Ver planos
-            </button>
-          </div>
-          <div className="mt-4 rounded-lg border border-[#E2E8F0] p-3">
-            <p className="text-xs text-[#94A3B8]">Workspace</p>
-            <div className="mt-2">
-              <WorkspaceSwitcher
-                workspaces={workspaces}
-                value={currentWorkspaceId}
-                onChange={onWorkspaceChange}
-              />
-            </div>
-            <div className="mt-3 flex items-center justify-between">
-              <button
-                className="rounded-full border border-[#E2E8F0] px-3 py-1 text-xs text-[#0F172A]"
-                onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
-              >
-                {locale.toUpperCase()}
-              </button>
-              <button className="text-xs text-[#64748B]" onClick={() => logout()}>
-                {t("nav.logout")}
-              </button>
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-3 rounded-lg border border-[#E2E8F0] p-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E2E8F0] text-xs font-semibold text-[#64748B]">
-              {user?.name?.slice(0, 2).toUpperCase() || "UI"}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#0F172A]">
-                {user?.name || "Usuário"}
-              </p>
-              <p className="truncate text-xs text-[#94A3B8]">{user?.email || ""}</p>
-            </div>
-          </div>
-        </aside>
-        <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-white/80 px-6 py-4 backdrop-blur">
-            <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div>
-                <h1 className="text-lg font-semibold text-[#0F172A]">Dashboard</h1>
-                <p className="text-xs text-[#94A3B8]">Visão geral do workspace</p>
-              </div>
-              <div className="hidden items-center gap-3 sm:flex">
-                <div className="relative">
-                  <input
-                    className="w-64 rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-[#0F172A] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
-                    placeholder="Buscar..."
-                  />
-                  <span className="pointer-events-none absolute right-3 top-2.5 text-xs text-[#94A3B8]">
-                    ⌘K
-                  </span>
-                </div>
-                <button className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-[#0F172A] shadow-sm">
-                  Notificações
-                </button>
-              </div>
-            </div>
-          </header>
-          <main className="mx-auto w-full max-w-6xl px-6 py-10">
-            {children}
-          </main>
         </div>
-      </div>
+        {nav}
+        <div className="flow-account-tools">
+          <button className="flow-quiet-button flow-locale-button" onClick={() => setLocale(locale === "pt" ? "en" : "pt")} aria-label="Mudar idioma">{locale.toUpperCase()}</button>
+          <button className="flow-account-pill" onClick={() => void logout()} title={t("nav.logout")}>
+            <span className="flow-avatar">{user?.name?.slice(0, 2).toUpperCase() || "FL"}</span>
+            <span className="flow-account-copy"><strong>{user?.name || "Flowio"}</strong><small>{user?.email || activeLabel}</small></span>
+            <span className="flow-account-chevron" aria-hidden="true">⌄</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="flow-mobile-nav">{nav}</div>
+      <main className="flow-main" key={pathname}>{children}</main>
     </div>
   );
 }

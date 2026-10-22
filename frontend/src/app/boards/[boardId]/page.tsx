@@ -874,7 +874,7 @@ export default function BoardEditorPage() {
       fullBleedSecondary={
         <div className="flex w-full items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] text-sm font-semibold text-white shadow-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF967D] to-[#E85D43] text-sm font-semibold text-white shadow-md">
               F
             </div>
             <div>
@@ -907,7 +907,7 @@ export default function BoardEditorPage() {
               Compartilhar
             </button>
             <button
-              className="rounded-lg bg-[#3B82F6] px-3 py-2 text-xs text-white shadow-sm"
+              className="rounded-lg bg-[#F2674B] px-3 py-2 text-xs text-white shadow-sm hover:bg-[#DE553C]"
               onClick={() => addChild("root")}
             >
               Adicionar ramo
@@ -936,7 +936,7 @@ export default function BoardEditorPage() {
               ↖
             </button>
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#8B5CF6]/10 text-[#8B5CF6]"
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F2674B]/10 text-[#DE553C]"
               onClick={() => addChild(selectedId)}
               title="Adicionar nó"
             >
@@ -1038,7 +1038,7 @@ export default function BoardEditorPage() {
                           strokeWidth="2"
                           fill="none"
                         />
-                        <circle cx={midX} cy={midY} r={3} fill="#8B5CF6" opacity="0.4" />
+                        <circle cx={midX} cy={midY} r={3} fill="#F2674B" opacity="0.4" />
                       </g>
                     );
                   })}
@@ -1049,7 +1049,7 @@ export default function BoardEditorPage() {
                   key={node.id}
                   className={`absolute w-[220px] rounded-xl border bg-white px-4 py-3 text-left text-[13px] shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.12)] ${
                     selectedId === node.id
-                      ? "border-[#8B5CF6] ring-2 ring-[#8B5CF6]/30"
+                      ? "border-[#F2674B] ring-2 ring-[#F2674B]/30"
                       : "border-[#E2E8F0]"
                   }`}
                   style={{
@@ -1344,7 +1344,7 @@ export default function BoardEditorPage() {
                             <button
                               key={emoji}
                               className={`h-8 w-8 rounded-md text-lg hover:bg-[#F1F5F9] ${
-                                selectedNode.emoji === emoji ? "bg-[#EFF6FF]" : ""
+                                selectedNode.emoji === emoji ? "bg-[#FFF0EB]" : ""
                               }`}
                               onClick={() => updateNodeProps(selectedNode.id, { emoji })}
                             >

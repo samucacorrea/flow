@@ -118,54 +118,56 @@ export default function BillingPage() {
     <AppShell currentWorkspaceId={currentWorkspaceId} onWorkspaceChange={handleWorkspaceChange}>
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-semibold">{t("billing.title")}</h1>
+          <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#D9563D]">Workspace</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#202123]">{t("billing.title")}</h1>
           {currentWorkspace && (
-            <p className="text-sm text-[#64748B]">
-              {currentWorkspace.name} · {currentWorkspace.plan.toUpperCase()} · {currentWorkspace.subscription_status || "-"}
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#73757D]">
+              <span>{currentWorkspace.name} · {currentWorkspace.plan.toUpperCase()} · {currentWorkspace.subscription_status || "-"}</span>
+              {currentWorkspace.manual_plan && <span className="rounded-full bg-[#FFF0EB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#D9563D]">Plano manual</span>}
+            </div>
           )}
         </div>
 
         {success && (
-          <div className="rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] p-4 text-sm text-[#166534]">
+          <div className="rounded-2xl border border-[#CBE9DC] bg-[#EFF9F4] p-4 text-sm text-[#17684F]">
             {success}
           </div>
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6">
-            <h2 className="text-lg font-semibold">Pro</h2>
+          <div className="rounded-2xl border border-[#E7E8EA] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div className="flex items-start justify-between gap-3"><h2 className="text-xl font-semibold text-[#202123]">Pro</h2>{currentWorkspace?.plan === "pro" && <span className="rounded-full bg-[#FFF0EB] px-3 py-1 text-xs font-semibold text-[#D9563D]">Plano atual</span>}</div>
             <p className="mt-2 text-sm text-[#64748B]">{t("billing.proDesc")}</p>
             <button
-              className="mt-4 rounded-md bg-[#3B82F6] px-4 py-2 text-sm text-white"
+              className="mt-4 rounded-lg bg-[#F2674B] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#DE553C]"
               onClick={() => startCheckout("pro")}
-              disabled={loading}
+              disabled={loading || currentWorkspace?.manual_plan}
             >
-              {t("billing.upgradePro")}
+              {currentWorkspace?.manual_plan ? "Gerenciado pelo admin" : t("billing.upgradePro")}
             </button>
           </div>
-          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6">
-            <h2 className="text-lg font-semibold">Team</h2>
+          <div className="rounded-2xl border border-[#E7E8EA] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <div className="flex items-start justify-between gap-3"><h2 className="text-xl font-semibold text-[#202123]">Team</h2>{currentWorkspace?.plan === "team" && <span className="rounded-full bg-[#FFF0EB] px-3 py-1 text-xs font-semibold text-[#D9563D]">Plano atual</span>}</div>
             <p className="mt-2 text-sm text-[#64748B]">{t("billing.teamDesc")}</p>
             <button
-              className="mt-4 rounded-md bg-[#8B5CF6] px-4 py-2 text-sm text-white"
+              className="mt-4 rounded-lg bg-[#202123] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3B3C40]"
               onClick={() => startCheckout("team")}
-              disabled={loading}
+              disabled={loading || currentWorkspace?.manual_plan}
             >
-              {t("billing.upgradeTeam")}
+              {currentWorkspace?.manual_plan ? "Gerenciado pelo admin" : t("billing.upgradeTeam")}
             </button>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6">
+        <div className="rounded-2xl border border-[#E7E8EA] bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{t("billing.portalTitle")}</h2>
           <p className="mt-2 text-sm text-[#64748B]">{t("billing.portalBody")}</p>
           <button
-            className="mt-4 rounded-md border border-[#E2E8F0] px-4 py-2 text-sm text-[#0F172A]"
+            className="mt-4 rounded-lg border border-[#E2E8EA] px-4 py-2 text-sm font-medium text-[#202123] hover:bg-[#F7F8F9]"
             onClick={openPortal}
-            disabled={loading}
+            disabled={loading || currentWorkspace?.manual_plan}
           >
-            {t("billing.portal")}
+            {currentWorkspace?.manual_plan ? "Cobrança gerenciada pelo administrador" : t("billing.portal")}
           </button>
         </div>
 

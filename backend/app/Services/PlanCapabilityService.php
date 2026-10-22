@@ -10,6 +10,7 @@ class PlanCapabilityService
     public const PLAN_FREE = 'free';
     public const PLAN_PRO = 'pro';
     public const PLAN_TEAM = 'team';
+
     public function hasUnlimitedLimits(User $user): bool
     {
         return (bool) $user->unlimited_limits;
@@ -60,12 +61,14 @@ class PlanCapabilityService
 
     public function isPro(Workspace $workspace): bool
     {
-        return $workspace->plan === self::PLAN_PRO && $this->subscriptionActiveOrTrialing($workspace);
+        return $workspace->plan === self::PLAN_PRO
+            && ($workspace->manual_plan || $this->subscriptionActiveOrTrialing($workspace));
     }
 
     public function isTeam(Workspace $workspace): bool
     {
-        return $workspace->plan === self::PLAN_TEAM && $this->subscriptionActiveOrTrialing($workspace);
+        return $workspace->plan === self::PLAN_TEAM
+            && ($workspace->manual_plan || $this->subscriptionActiveOrTrialing($workspace));
     }
 
     protected function subscriptionActiveOrTrialing(Workspace $workspace): bool

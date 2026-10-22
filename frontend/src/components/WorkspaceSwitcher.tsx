@@ -18,6 +18,7 @@ export function WorkspaceSwitcher({
     <label className="flex items-center gap-2 text-sm font-medium text-[#475569]">
       <span>{t("workspace.switch")}</span>
       <select
+        aria-label={t("workspace.switch")}
         className="rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
         value={value ?? ""}
         onChange={(event) => onChange(event.target.value)}

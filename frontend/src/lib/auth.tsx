@@ -16,6 +16,7 @@ export type Workspace = {
   name: string;
   plan: string;
   subscription_status: string | null;
+  manual_plan?: boolean;
   pivot?: { role: string };
 };
 

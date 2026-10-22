@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class AdminController extends ApiController
 {
@@ -16,11 +16,28 @@ class AdminController extends ApiController
     public function users()
     {
         $users = User::query()
+            ->with('workspaces:id,name,plan,subscription_status,manual_plan')
             ->select(['id', 'name', 'email', 'is_admin', 'unlimited_limits', 'created_at'])
             ->orderByDesc('created_at')
             ->paginate(50);
 
         return response()->json($users);
+    }
+
+    public function dashboard()
+    {
+        return response()->json([
+            'users' => User::count(),
+            'admins' => User::where('is_admin', true)->count(),
+            'unlimited_users' => User::where('unlimited_limits', true)->count(),
+            'workspaces' => Workspace::count(),
+            'manual_workspaces' => Workspace::where('manual_plan', true)->count(),
+            'plans' => [
+                'free' => Workspace::where('plan', 'free')->count(),
+                'pro' => Workspace::where('plan', 'pro')->count(),
+                'team' => Workspace::where('plan', 'team')->count(),
+            ],
+        ]);
     }
 
     public function updateUser(Request $request, User $user)
@@ -52,6 +69,24 @@ class AdminController extends ApiController
 
         return response()->json([
             'user' => $user->only(['id', 'name', 'email', 'is_admin', 'unlimited_limits', 'created_at']),
+        ]);
+    }
+
+    public function updateWorkspacePlan(Request $request, Workspace $workspace)
+    {
+        $data = $request->validate([
+            'plan' => ['required', 'in:free,pro,team'],
+        ]);
+
+        $workspace->plan = $data['plan'];
+        $workspace->manual_plan = true;
+        $workspace->subscription_status = $data['plan'] === 'free' ? null : 'active';
+        $workspace->save();
+
+        return response()->json([
+            'workspace' => $workspace->only([
+                'id', 'name', 'plan', 'subscription_status', 'manual_plan',
+            ]),
         ]);
     }
 }
